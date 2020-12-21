@@ -3,7 +3,7 @@
     <div class="form-row" :class="{ 'mb-on-warning': errors.length > 0 }">
       <div class="form-row-group" :class="{ 'mb-on-warning-mobile': errors.length > 0 }">
         <label for="fullName">ФИО<span>*</span></label>
-        <input :class="{ 'warning': errors.length > 0 }" autocomplete="off" id="fullName" type="text" placeholder="Введите ФИО" name="fullName" v-model="fullName" @change="checkErrors">
+        <input :class="{ 'warning': errors.length > 0 }" autocomplete="off" id="fullName" type="text" placeholder="Введите ФИО" name="fullName" v-model="fullName">
         <img v-if="fullName.length > 0" @click="resetFullName" class="form-row-group-reset" src="../assets/close.svg">
         <transition name="fade" v-on:enter="enter">
           <span v-if="errors.length > 0" class="form-row-group-warning"><img src="../assets/warning.svg">Необходимо ввести ФИО</span>
@@ -37,7 +37,7 @@
       </div>
       <div class="form-row-group form-row-group-switch-form">
         <label class="form-row-group-switch">
-          <input type="checkbox">
+          <input type="checkbox" v-model="isReadyMove">
           <span class="form-row-group-switch-slider"></span>
         </label>
         <span>Готов к переезду</span>
@@ -51,21 +51,21 @@
         <label class="female" for="female">Женщина</label>
       </div>
       <div class="form-row-checkbox">
-        <input id="fullWorkDay" type="checkbox">
+        <input id="fullWorkDay" type="checkbox" v-model="isFullWorkDay">
         <label for="fullWorkDay">
           Полный рабочий день
         </label>
       </div>
       <div class="form-row-checkbox">
-        <input type="checkbox" id="remoteWork">
+        <input type="checkbox" id="remoteWork" v-model="isRemoteWork">
         <label for="remoteWork">
           Удалённая работа
         </label>
       </div>
     </div>
     <div class="form-row buttons">
-      <button @click="reloadPage" class="form-row-cancel-button">Отменить</button>
-      <button @click="checkForm" class="form-row-save-button">Сохранить</button>
+      <button :disabled='isDisabled' @click="reloadPage" class="form-row-cancel-button">Отменить</button>
+      <button :disabled='isDisabled' @click="checkForm" class="form-row-save-button">Сохранить</button>
     </div>
     <transition name="fade" v-on:enter="enter">
       <div v-if="isFormCompletedSuccessfully" class="form-row success-message">
@@ -87,10 +87,13 @@ export default {
   },
   data() {
     return {
-      fullName: '',
+      fullName: [],
+      isReadyMove: false,
+      isFullWorkDay: false,
+      isRemoteWork: false,
       gender: 'male',
       isFormCompletedSuccessfully: false,
-      degreeStudyList: null,
+      degreeStudyList: [],
       selected: [],
       errors: [],
       options: [
@@ -121,12 +124,11 @@ export default {
       return option.name;
     },
     checkForm: function () {
-      this.errors = [];
-      if (!this.fullName) {
-        this.errors.push('notFullName');
+      if (this.errors.length > 0) {
         return;
       } else {
         this.isFormCompletedSuccessfully = true;
+        return;
       }
     },
     enter: function() {
@@ -135,15 +137,24 @@ export default {
         that.isFormCompletedSuccessfully = false;
       }, 3000); // hide the message after 3 seconds
     },
-    checkErrors() {
-      if (this.fullName) {
-        this.errors = [];
-      }
-    },
     reloadPage() {
       document.location.reload();
     }
   },
+  computed: {
+    isDisabled: function(){
+      return !(this.fullName.length > 0 || this.degreeStudyList.length > 0 || this.isRemoteWork || this.isFullWorkDay || this.isReadyMove || this.gender === 'female');
+    }
+  },
+  watch: {
+    fullName: function (val) {
+      if (val.length < 1) {
+        this.errors.push('notFullName');
+      } else {
+        this.errors = [];
+      }
+    }
+  }
 }
 </script>
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>

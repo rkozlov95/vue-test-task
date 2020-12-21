@@ -370,6 +370,10 @@ body {
     height: 11px;
 }
 
+.form-row > button[disabled="disabled"] {
+    opacity: 0.5;
+}
+
 .form-row > .form-row-cancel-button {
     width: 120px;
     height: 38px;
